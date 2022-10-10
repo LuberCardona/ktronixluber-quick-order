@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import  { useMutation, useLazyQuery } from 'react-apollo'
 import UPDATE_CART from '../graphql/updateCart.graphql'
 import GET_PRODUCT from '../graphql/getProductBySku.graphql' 
+import { useCssHandles } from 'vtex.css-handles'
+
+import "./styles.css"
 
 const QuickOrder = () => {
   const [inputText, setInputText] = useState("");
@@ -10,14 +13,18 @@ const QuickOrder = () => {
   const [getProductData, { data: product}] = useLazyQuery(GET_PRODUCT)
   const [addToCart] = useMutation(UPDATE_CART) 
 
-  const handleChange = (evt: any) => {
+  const handleChange = (evt:any) => {
     setInputText(evt.target.value)
-    console.log("Input changed:", inputText)
+    console.log("Input changed:", inputText);
   }
+   const CSS_HANDLES = [
+    "input__quickOrder"
+  ]
+  const handles = useCssHandles(CSS_HANDLES) 
+
   useEffect(() => {
     console.log("El resultado de mi producto es:", product, search )
-   // console.log("PRUEBA....El resultado de mi producto es:", data)
-      if (product) {         
+    if(product) {         
       let skuId = parseInt(inputText)
       addToCart ({
         variables:{
@@ -32,43 +39,42 @@ const QuickOrder = () => {
         }
       })
       .then(() => {
-        window.location.href = "/checkout"
-      })
-    } 
+        window.location.href = "/cart"
+      }) 
+    }  
   }, [product, search]) 
 
   const addProductToCart = () => {
-    // ingresar declaracoin de la mutacion
-    getProductData({    
+     getProductData({    
       variables:{
         sku: inputText
-      }
-    }) 
-
+      }      
+    })
   } 
 
   const searchProduct = (evt:any) => {
     evt.preventDefault();
-   // console.log("Buscando a ...")
     if (!inputText) {
-      alert("Por favor ingrese un codigo")
+      alert("Por favor ingrese el Id del producto")
     }else{
       console.log("Estamos buscando:", inputText)
        setSearch(inputText)
        addProductToCart() 
-    } 
-    
-  } 
-  return <div>
-    <h2>Compra rápida</h2>
-    <form onSubmit={searchProduct}>
-      <div>
-        <label htmlFor="sku">Ingresa el número de sku</label>
-        <input id="sku" type="text" onChange={handleChange}></input>
-      </div>
-      <input type="submit" value="AÑADIR AL CARRITO" />
-    </form>
-  </div>
+    }    
+  }   
+
+  return (
+    <div className='pa5 ml5 mr5 mt3 mb3 ba b--light-gray'>
+      <h2>Compra rápida</h2>
+      <form onSubmit={searchProduct}>
+        <div className='flex pt5 pb5'>
+          <label className='pr5' htmlFor="sku">Ingresa el número de SKU</label>
+          <input id="sku" type="text" onChange={handleChange}></input>
+        </div>
+        <input type="submit" value="AÑADIR AL CARRITO" className={handles.input__quickOrder} />
+      </form>
+    </div>
+  )
 }
 
 export default QuickOrder
